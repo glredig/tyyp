@@ -1,0 +1,10 @@
+body {
+  background-color: #555555;
+}
+
+#game_board {
+  width: 500px;
+  height: 800px;
+  border: 1px solid #55aa55;
+  background-color: #000000;
+}
