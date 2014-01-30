@@ -32,9 +32,19 @@ Target.prototype = {
         this.ctx.fillStyle = this.color;
       }
       this.ctx.fill();
-      this.ctx.fillStyle = "#ffffff";
-      this.ctx.fillText(this.word, this.x - this.word_width / 2, this.y + 15);
+      this.draw_text();
     }
+  }, 
+
+  draw_text: function() {
+    var hit_letters = this.word.slice(0, this.hit_count),
+        ok_letters  = this.word.slice(this.hit_count),
+        hit_width   = this.ctx.measureText(hit_letters).width
+
+    this.ctx.fillStyle = "#555555";
+    this.ctx.fillText(hit_letters, this.x - this.word_width / 2, this.y + 15);
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.fillText(ok_letters, this.x - this.word_width / 2 + hit_width, this.y + 15);
   }
 }
 
