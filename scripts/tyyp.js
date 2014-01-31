@@ -12,22 +12,19 @@ var TYYP = {
 
     // TODO: remove jQuery dependency
     $(document).keydown(function(e) {
-        if (e.keyCode == 32) {
-          var assigned_target;
-          for (var i = 0; i < TYYP.targets.length; i++) {
-            if (TYYP.targets[i].hit_count < TYYP.targets[i].word.length) {
-              assigned_target = TYYP.targets[i];
-              break;    
-            }
+        var assigned_target;
+        for (var i = 0; i < TYYP.targets.length; i++) {
+          if (TYYP.targets[i].hit_count < TYYP.targets[i].word.length) {
+            assigned_target = TYYP.targets[i];
+            break;    
           }
-          if (assigned_target) {
-            var new_bullet = new Bullet(assigned_target);
-            new_bullet.init();
-            TYYP.bullets.push(new_bullet);
-            assigned_target.end_y = new_bullet.end_y;
-            assigned_target.hit_count++;  
-          }
-        } 
+        }
+        if (assigned_target && assigned_target.hit(e.keyCode)) {
+          var new_bullet = new Bullet(assigned_target);
+          new_bullet.init();
+          TYYP.bullets.push(new_bullet);
+          assigned_target.end_y = new_bullet.end_y;
+        }
       });
 
       requestAnimationFrame(TYYP.loop);

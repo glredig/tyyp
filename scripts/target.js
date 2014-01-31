@@ -21,6 +21,16 @@ Target.prototype = {
     this.y += this.velocity;
   },
 
+  hit: function(code) {
+    if (this.word[this.hit_count] == KEYS.getChar(code)) {
+      this.hit_count++;
+      return true
+    }
+    else {
+      return false
+    }
+  },
+
   draw: function() {
     if (this.y < TYYP.c_height) {
       this.ctx.beginPath();
