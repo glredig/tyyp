@@ -8,6 +8,7 @@ function Target(config) {
   this.color = config.color;
   this.word_width = 90;
   this.ctx = TYYP.ctx;
+  this.img = new Image();
 }
 
 Target.prototype = {
@@ -15,6 +16,8 @@ Target.prototype = {
     this.ctx.font = this.font;
     this.x = TYYP.rand(this.word_width, TYYP.c_width - this.word_width * 2);
     this.word_width = this.ctx.measureText(this.word).width;
+    this.source_img = document.getElementById('chuters');
+    this.img.src = this.source_img.src;
   },
 
   updatePosition: function() {
@@ -39,14 +42,13 @@ Target.prototype = {
   },
 
   draw: function() {
-    if (this.y < TYYP.c_height) {
-      this.ctx.beginPath();
-      this.ctx.arc(this.x, this.y, 8, 0, 2 * Math.PI, false);
+    var img = document.getElementById('')
+    if (this.y < TYYP.c_height + 50) {
       if (this.hit_count == this.word.length && this.y >= this.end_y) {
-        this.ctx.fillStyle = "#550000";
+        this.ctx.drawImage(this.img, this.source_img.width / 2, 0, this.source_img.width / 2, this.source_img.height, this.x - this.source_img.width / 5, this.y - this.source_img.height * .85, this.source_img.width / 2, this.source_img.height);
       }
       else {
-        this.ctx.fillStyle = this.color;
+        this.ctx.drawImage(this.img, 0, 0, this.source_img.width / 2, this.source_img.height, this.x - this.source_img.width / 4, this.y - this.source_img.height * .85, this.source_img.width / 2, this.source_img.height);
       }
       this.ctx.fill();
       this.drawText();
@@ -58,9 +60,9 @@ Target.prototype = {
         ok_letters  = this.word.slice(this.hit_count),
         hit_width   = this.ctx.measureText(hit_letters).width
 
-    this.ctx.fillStyle = "#555555";
+    this.ctx.fillStyle = "#ff0000";
     this.ctx.fillText(hit_letters, this.x - this.word_width / 2, this.y + 15);
-    this.ctx.fillStyle = "#ffffff";
+    this.ctx.fillStyle = "#000000";
     this.ctx.fillText(ok_letters, this.x - this.word_width / 2 + hit_width, this.y + 15);
   }
 }

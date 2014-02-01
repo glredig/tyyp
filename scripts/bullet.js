@@ -66,7 +66,7 @@ Bullet.prototype = {
   },
   
   draw: function() {
-    TYYP.ctx.fillStyle = "#ddffdd";
+    TYYP.ctx.fillStyle = "#000000";
     TYYP.ctx.fillRect(this.x, this.y, 3, 3);
     // ctx.fillStyle = "#ff0000";
     // ctx.fillRect(this.end_x, this.end_y, 3, 3);

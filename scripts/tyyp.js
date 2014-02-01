@@ -67,7 +67,7 @@ var TYYP = {
   update: function() {
     for (var i = 0; i < TYYP.targets.length; i++) {
       TYYP.targets[i].updatePosition();
-      if (TYYP.targets[i].y > TYYP.c_height + 5) {
+      if (TYYP.targets[i].y > TYYP.c_height + 50) {
         if (TYYP.targets[i] == TYYP.assigned_target) {
           TYYP.assigned_target = undefined;
         }
@@ -96,8 +96,6 @@ var TYYP = {
 
   draw: function() {
     TYYP.ctx.clearRect(0, 0, TYYP.c_width, TYYP.c_height);
-    TYYP.ctx.fillStyle = "222222";
-    TYYP.ctx.fillRect(0, 0, TYYP.c_width, TYYP.c_height);
 
     for (var i = 0; i < TYYP.targets.length; i++) {
       TYYP.targets[i].draw();
@@ -110,5 +108,5 @@ var TYYP = {
 }
 
 $(document).ready(function() {
-  TYYP.init();
+  TYYP.init();    
 });
