@@ -5,33 +5,33 @@ var TYYP = {
   bullets: [],
 
   init: function() {
-    TYYP.canvas = document.getElementById('game_board');
-    TYYP.ctx = TYYP.canvas.getContext('2d');
-    TYYP.c_width = TYYP.canvas.width;
+    TYYP.canvas   = document.getElementById('game_board');
+    TYYP.ctx      = TYYP.canvas.getContext('2d');
+    TYYP.c_width  = TYYP.canvas.width;
     TYYP.c_height = TYYP.canvas.height;
 
     // TODO: remove jQuery dependency
     $(document).keydown(function(e) {
-        var assigned_target;
-        for (var i = 0; i < TYYP.targets.length; i++) {
-          if (TYYP.targets[i].hit_count < TYYP.targets[i].word.length) {
-            assigned_target = TYYP.targets[i];
-            break;    
-          }
-        }
-        if (assigned_target && assigned_target.hit(e.keyCode)) {
-          var new_bullet = new Bullet(assigned_target);
-          new_bullet.init();
-          TYYP.bullets.push(new_bullet);
-          assigned_target.end_y = new_bullet.end_y;
-        }
-      });
+      if (TYYP.assigned_target == undefined) {
+        TYYP.findTarget(e.keyCode);   
+      }
 
-      requestAnimationFrame(TYYP.loop);
+      if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
+        var new_bullet = new Bullet(TYYP.assigned_target);
+        new_bullet.init();
+        TYYP.bullets.push(new_bullet);
+        TYYP.assigned_target.end_y = new_bullet.end_y;
+        if (TYYP.assigned_target.hit_count == TYYP.assigned_target.word.length) {
+          TYYP.assigned_target = undefined;
+        }
+      }
+    });
+
+    requestAnimationFrame(TYYP.loop);
   },
 
   // Generic functions
-  get_random_color: function() {
+  getRandomColor: function() {
     var letters  = '0123456789ABCDEF'.split(''),
         color    = '#';
 
@@ -55,17 +55,29 @@ var TYYP = {
     requestAnimationFrame(TYYP.loop);
   },
 
+  findTarget: function(code) {
+    for (var i = 0; i < TYYP.targets.length; i++) {
+      if (TYYP.targets[i].hit_count < TYYP.targets[i].word.length && TYYP.targets[i].getNextLetter() == KEYS.getChar(code)) {
+        TYYP.assigned_target = TYYP.targets[i];
+        break;    
+      }
+    } 
+  },
+
   update: function() {
     for (var i = 0; i < TYYP.targets.length; i++) {
-      TYYP.targets[i].update_position();
+      TYYP.targets[i].updatePosition();
       if (TYYP.targets[i].y > TYYP.c_height + 5) {
+        if (TYYP.targets[i] == TYYP.assigned_target) {
+          TYYP.assigned_target = undefined;
+        }
         TYYP.targets.splice(i, 1);
         i--;
       }
     }
 
     for (var i = 0; i < TYYP.bullets.length; i++) {
-      TYYP.bullets[i].update_position();
+      TYYP.bullets[i].updatePosition();
 
       if (TYYP.bullets[i].y < TYYP.bullets[i].end_y ) {
         TYYP.bullets.splice(i, 1);
@@ -74,7 +86,7 @@ var TYYP = {
     }
 
     if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0) {
-      var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)], color: TYYP.get_random_color()});
+      var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)], color: TYYP.getRandomColor()});
       new_target.init();
       TYYP.targets.push(new_target);
     }

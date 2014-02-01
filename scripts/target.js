@@ -17,8 +17,11 @@ Target.prototype = {
     this.word_width = this.ctx.measureText(this.word).width;
   },
 
-  update_position: function() {
+  updatePosition: function() {
     this.y += this.velocity;
+    if (this.hit_count == this.word.length && this.y >= this.end_y) {
+      this.velocity = 6;
+    }
   },
 
   hit: function(code) {
@@ -29,6 +32,10 @@ Target.prototype = {
     else {
       return false
     }
+  },
+
+  getNextLetter: function() {
+    return this.word[this.hit_count];
   },
 
   draw: function() {
@@ -42,11 +49,11 @@ Target.prototype = {
         this.ctx.fillStyle = this.color;
       }
       this.ctx.fill();
-      this.draw_text();
+      this.drawText();
     }
   }, 
 
-  draw_text: function() {
+  drawText: function() {
     var hit_letters = this.word.slice(0, this.hit_count),
         ok_letters  = this.word.slice(this.hit_count),
         hit_width   = this.ctx.measureText(hit_letters).width

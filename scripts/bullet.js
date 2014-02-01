@@ -16,10 +16,10 @@ Bullet.prototype = {
     this.x = 0;
     this.y = TYYP.c_height;
     
-    this.set_end_point();
+    this.setEndPoint();
   },
   
-  set_end_point: function() {
+  setEndPoint: function() {
     var a, b, c, disc, t1, t2, t;
 
     // Vector work to find bullet/target intercept point
@@ -60,7 +60,7 @@ Bullet.prototype = {
     }
   }, 
   
-  update_position: function() {     
+  updatePosition: function() {     
     this.x += this.vel_x;
     this.y -= this.vel_y;
   },

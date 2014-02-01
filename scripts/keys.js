@@ -1,8 +1,4 @@
 var KEYS = {  
-  getCode: function(char) {
-
-  },
-
   getChar: function(code) {
     var val = '';
     switch(code) {
