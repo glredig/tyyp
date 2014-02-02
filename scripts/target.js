@@ -5,7 +5,6 @@ function Target(config) {
   this.end_x;
   this.end_y;
   this.word = config.word;
-  this.color = config.color;
   this.word_width = 90;
   this.ctx = TYYP.ctx;
   this.img = new Image();
@@ -29,6 +28,7 @@ Target.prototype = {
 
   hit: function(code) {
     if (this.word[this.hit_count] == KEYS.getChar(code)) {
+      TYYP.score++;
       this.hit_count++;
       return true
     }
@@ -60,6 +60,7 @@ Target.prototype = {
         ok_letters  = this.word.slice(this.hit_count),
         hit_width   = this.ctx.measureText(hit_letters).width
 
+    this.ctx.font = this.font;
     this.ctx.fillStyle = "#ff0000";
     this.ctx.fillText(hit_letters, this.x - this.word_width / 2, this.y + 15);
     this.ctx.fillStyle = "#000000";

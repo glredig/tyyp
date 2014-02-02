@@ -1,8 +1,9 @@
 var TYYP = {
   frame_count: 0,
-  words: ["hello", "world", "game", "time", "longshanks", "answer"],
+  words: [],
   targets: [],
   bullets: [],
+  score: 0,
 
   init: function() {
     TYYP.canvas   = document.getElementById('game_board');
@@ -10,41 +11,80 @@ var TYYP = {
     TYYP.c_width  = TYYP.canvas.width;
     TYYP.c_height = TYYP.canvas.height;
 
-    // TODO: remove jQuery dependency
-    $(document).keydown(function(e) {
-      if (TYYP.assigned_target == undefined) {
-        TYYP.findTarget(e.keyCode);   
-      }
 
-      if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
-        var new_bullet = new Bullet(TYYP.assigned_target);
-        new_bullet.init();
-        TYYP.bullets.push(new_bullet);
-        TYYP.assigned_target.end_y = new_bullet.end_y;
-        if (TYYP.assigned_target.hit_count == TYYP.assigned_target.word.length) {
-          TYYP.assigned_target = undefined;
+    // Wait for word retrieving AJAX to finish before starting the
+    // game
+    TYYP.getWords(1).then(function(data) {
+      var parsedJSON = JSON.parse(data)
+
+      // Add game friendly words to the array
+      for (var i = 0; i < parsedJSON.length; i++) {
+        var word = parsedJSON[i]["word"];
+        if (TYYP.noSpecialCharacters(word)) {
+          TYYP.words.push(word.toLowerCase());          
         }
       }
-    });
 
-    requestAnimationFrame(TYYP.loop);
+      $(document).keydown(function(e) {
+        if (TYYP.assigned_target == undefined) {
+          TYYP.findTarget(e.keyCode);   
+        }
+
+        if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
+          var new_bullet = new Bullet(TYYP.assigned_target);
+          
+          new_bullet.init();
+          TYYP.bullets.push(new_bullet);
+          TYYP.assigned_target.end_y = new_bullet.end_y;
+          if (TYYP.assigned_target.hit_count == TYYP.assigned_target.word.length) {
+            TYYP.score += 5;
+            TYYP.assigned_target = undefined;
+          }
+        }
+      });
+
+      requestAnimationFrame(TYYP.loop);  
+    });
+    // TODO: remove jQuery dependency
+  },
+
+  getWords: function(level) {
+    
+    var deferred = Q.defer(),
+        req      = new XMLHttpRequest();
+        url      = "http://api.wordnik.com:80/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=0&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=3&maxLength=6&limit=30&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
+    
+    req.open('GET', url, true);
+
+    req.onreadystatechange = function(e) {
+      if (req.readyState != 4) {
+        return;
+      }
+
+      // Error case
+      if (req.status != 200 && req.status != 304) {
+        deferred.reject(new Error('Server responded with ' + req.status));
+      }
+      // Success case; resolve
+      else {
+        deferred.resolve(req.responseText);
+      }
+    }
+
+    req.send();
+
+    return deferred.promise;
+  },
+
+  // Exclude words containing any special characters 
+  noSpecialCharacters: function(word) {
+    return /^[a-zA-Z]+$/.test(word);
   },
 
   // Generic functions
-  getRandomColor: function() {
-    var letters  = '0123456789ABCDEF'.split(''),
-        color    = '#';
-
-    for (var i = 0; i < 6; i++ ) {
-      color += letters[Math.round(Math.random() * 15)];
-    }
-    return color;
-  },
-
   rand: function(min, max) {
     return Math.floor(Math.random() * max + min);
   },
-
 
   // Game loop functions
   // 
@@ -86,7 +126,7 @@ var TYYP = {
     }
 
     if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0) {
-      var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)], color: TYYP.getRandomColor()});
+      var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)]});
       new_target.init();
       TYYP.targets.push(new_target);
     }
@@ -104,6 +144,10 @@ var TYYP = {
     for (var i = 0; i < TYYP.bullets.length; i++) {
       TYYP.bullets[i].draw();
     }
+
+    // TYYP.ctx.font = "20px Arial";
+    TYYP.ctx.fillStyle = "#333333";
+    TYYP.ctx.fillText("Score: " + TYYP.score, 20, 20);
   }
 }
 
