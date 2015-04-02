@@ -8,6 +8,7 @@ function Target(config) {
   this.word_width = 90;
   this.ctx = TYYP.ctx;
   this.img = new Image();
+  this.dead = false;
 }
 
 Target.prototype = {
@@ -21,7 +22,7 @@ Target.prototype = {
 
   updatePosition: function() {
     this.y += this.velocity;
-    if (this.hit_count == this.word.length && this.y >= this.end_y) {
+    if (this.dead && this.y >= this.end_y) {
       this.velocity = 6;
     }
   },
@@ -29,10 +30,15 @@ Target.prototype = {
   hit: function(code) {
     if (this.word[this.hit_count] == KEYS.getChar(code)) {
       TYYP.score++;
+      TYYP.hits++;
       this.hit_count++;
+      if (this.hit_count == this.word.length) {
+        this.dead = true;
+      }
       return true
     }
     else {
+      TYYP.misses++;
       return false
     }
   },

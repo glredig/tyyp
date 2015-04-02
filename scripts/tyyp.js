@@ -4,6 +4,8 @@ var TYYP = {
   targets: [],
   bullets: [],
   score: 0,
+  hits: 0,
+  misses: 0,
 
   init: function() {
     TYYP.canvas   = document.getElementById('game_board');
@@ -26,18 +28,23 @@ var TYYP = {
       }
 
       $(document).keydown(function(e) {
+
+        if (TYYP.assigned_target == undefined || TYYP.assigned_target.dead) {
+          TYYP.findTarget(e.keyCode);
+        }
+
         if (TYYP.assigned_target == undefined) {
-          TYYP.findTarget(e.keyCode);   
+          TYYP.misses++;
         }
 
         if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
           var new_bullet = new Bullet(TYYP.assigned_target);
-          
+          TYYP.hits++;
           new_bullet.init();
           TYYP.bullets.push(new_bullet);
           TYYP.assigned_target.end_y = new_bullet.end_y;
-          if (TYYP.assigned_target.hit_count == TYYP.assigned_target.word.length) {
-            TYYP.score += 5;
+          if (TYYP.assigned_target.dead) {
+            TYYP.score += TYYP.assigned_target.word.length;
             TYYP.assigned_target = undefined;
           }
         }
@@ -105,9 +112,15 @@ var TYYP = {
   },
 
   update: function() {
+    var missed_letters;
     for (var i = 0; i < TYYP.targets.length; i++) {
+      missed_letters = TYYP.targets[i].word.length - TYYP.targets[i].hit_count;
       TYYP.targets[i].updatePosition();
       if (TYYP.targets[i].y > TYYP.c_height + 50) {
+        if (!TYYP.targets[i].dead && missed_letters > 0) {
+          TYYP.score = Math.max(TYYP.score - missed_letters, 0);
+        }
+
         if (TYYP.targets[i] == TYYP.assigned_target) {
           TYYP.assigned_target = undefined;
         }
@@ -135,6 +148,8 @@ var TYYP = {
   },
 
   draw: function() {
+    var percentage;
+
     TYYP.ctx.clearRect(0, 0, TYYP.c_width, TYYP.c_height);
 
     for (var i = 0; i < TYYP.targets.length; i++) {
@@ -148,6 +163,14 @@ var TYYP = {
     // TYYP.ctx.font = "20px Arial";
     TYYP.ctx.fillStyle = "#333333";
     TYYP.ctx.fillText("Score: " + TYYP.score, 20, 20);
+
+    if (TYYP.hits == 0 && TYYP.misses == 0) {
+      percentage = 100;
+    }
+    else {
+      percentage = ((TYYP.hits / (TYYP.hits + TYYP.misses)) * 100).toFixed(1);
+    }
+    TYYP.ctx.fillText("Accuracy: " + percentage + "%", 20, 50);
   }
 }
 
