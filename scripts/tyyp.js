@@ -3,6 +3,7 @@ var TYYP = {
   words: [],
   targets: [],
   bullets: [],
+  score_balloons: [],
   score: 0,
   hits: 0,
   misses: 0,
@@ -138,6 +139,14 @@ var TYYP = {
       }
     }
 
+    for (var j = 0; j < TYYP.score_balloons.length; j++) {
+      TYYP.score_balloons[j].updatePosition();
+
+      if (TYYP.score_balloons[j].dead || TYYP.score_balloons[j].y > TYYP.c_height + 50) {
+        TYYP.score_balloons.splice(j, 1);
+      }
+    }
+
     if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0) {
       var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)]});
       new_target.init();
@@ -158,6 +167,10 @@ var TYYP = {
 
     for (var i = 0; i < TYYP.bullets.length; i++) {
       TYYP.bullets[i].draw();
+    }
+
+    for (var j = 0; j < TYYP.score_balloons.length; j++) {
+      TYYP.score_balloons[j].draw();
     }
 
     // TYYP.ctx.font = "20px Arial";

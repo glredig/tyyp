@@ -24,15 +24,30 @@ Target.prototype = {
     this.y += this.velocity;
     if (this.dead && this.y >= this.end_y) {
       this.velocity = 6;
+
+      if (typeof this.score_balloon == 'undefined') {
+        this.score_balloon = new ScoreBalloon({
+          x: this.x,
+          y: this.y,
+          val: this.hit_count.toString(),
+          velocity: -.05,
+          opacity: 1,
+          decay_rate: .01,
+          color: {r: 0, g: 100, b: 0}
+        });
+        TYYP.score_balloons.push(this.score_balloon);
+      }
     }
   },
 
   hit: function(code) {
+    var score_balloon;
+
     if (this.word[this.hit_count] == KEYS.getChar(code)) {
       TYYP.score++;
       TYYP.hits++;
       this.hit_count++;
-      if (this.hit_count == this.word.length) {
+      if (this.hit_count == this.word.length && !this.dead) {
         this.dead = true;
       }
       return true
