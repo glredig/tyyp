@@ -9,11 +9,11 @@ var TYYP = {
   misses: 0,
 
   init: function() {
-    TYYP.canvas   = document.getElementById('game_board');
-    TYYP.ctx      = TYYP.canvas.getContext('2d');
-    TYYP.c_width  = TYYP.canvas.width;
-    TYYP.c_height = TYYP.canvas.height;
-
+    TYYP.canvas         = document.getElementById('game_board');
+    TYYP.canvas.style.height = TYYP.canvas.height = window.innerHeight;
+    TYYP.ctx            = TYYP.canvas.getContext('2d');
+    TYYP.c_width        = TYYP.canvas.width;
+    TYYP.c_height       = TYYP.canvas.height;
 
     // Wait for word retrieving AJAX to finish before starting the
     // game
