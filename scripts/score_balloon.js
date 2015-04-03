@@ -34,7 +34,7 @@ ScoreBalloon.prototype = {
       this.ctx.fillStyle = "rgba(" + this.color.r + ", " + this.color.g + 
         ", " + this.color.b + ", " + this.opacity + ")";
       this.ctx.font = "16px Arial";
-      this.ctx.fillText("+" + this.val, this.x, this.y);
+      this.ctx.fillText(this.val, this.x, this.y);
     }
   }
 }

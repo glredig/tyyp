@@ -113,13 +113,30 @@ var TYYP = {
   },
 
   update: function() {
-    var missed_letters;
+    var missed_letters,
+        balloon;
+
     for (var i = 0; i < TYYP.targets.length; i++) {
       missed_letters = TYYP.targets[i].word.length - TYYP.targets[i].hit_count;
       TYYP.targets[i].updatePosition();
       if (TYYP.targets[i].y > TYYP.c_height + 50) {
         if (!TYYP.targets[i].dead && missed_letters > 0) {
           TYYP.score = Math.max(TYYP.score - missed_letters, 0);
+
+          if (TYYP.targets[i].score_balloon == undefined) {
+            balloon = new ScoreBalloon({
+              x: TYYP.targets[i].x,
+              y: Math.min(TYYP.targets[i].y, TYYP.c_height - 20),
+              val: "-" + missed_letters,
+              velocity: -.09,
+              opacity: 1,
+              decay_rate: .01,
+              color: {r: 100, g: 0, b: 0}
+            });
+
+            TYYP.targets[i].score_balloon = balloon;
+            TYYP.score_balloons.push(balloon);  
+          }
         }
 
         if (TYYP.targets[i] == TYYP.assigned_target) {

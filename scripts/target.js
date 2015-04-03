@@ -29,7 +29,7 @@ Target.prototype = {
         this.score_balloon = new ScoreBalloon({
           x: this.x,
           y: this.y,
-          val: this.hit_count.toString(),
+          val: "+ " + this.hit_count.toString(),
           velocity: -.05,
           opacity: 1,
           decay_rate: .01,
