@@ -4,9 +4,11 @@ var TYYP = {
   targets: [],
   bullets: [],
   score_balloons: [],
+  target_count: 0,
   score: 0,
   hits: 0,
   misses: 0,
+  level: 1,
 
   init: function() {
     TYYP.canvas         = document.getElementById('game_board');
@@ -17,7 +19,7 @@ var TYYP = {
 
     // Wait for word retrieving AJAX to finish before starting the
     // game
-    TYYP.getWords(1).then(function(data) {
+    TYYP.getWords(TYYP.level).then(function(data) {
       var parsedJSON = JSON.parse(data)
 
       // Add game friendly words to the array
@@ -27,40 +29,20 @@ var TYYP = {
           TYYP.words.push(word.toLowerCase());          
         }
       }
-
-      $(document).keydown(function(e) {
-
-        if (TYYP.assigned_target == undefined || TYYP.assigned_target.dead) {
-          TYYP.findTarget(e.keyCode);
-        }
-
-        if (TYYP.assigned_target == undefined) {
-          TYYP.misses++;
-        }
-
-        if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
-          var new_bullet = new Bullet(TYYP.assigned_target);
-          TYYP.hits++;
-          new_bullet.init();
-          TYYP.bullets.push(new_bullet);
-          TYYP.assigned_target.end_y = new_bullet.end_y;
-          if (TYYP.assigned_target.dead) {
-            TYYP.score += TYYP.assigned_target.word.length;
-            TYYP.assigned_target = undefined;
-          }
-        }
-      });
-
+      TYYP.setupListener();
       requestAnimationFrame(TYYP.loop);  
     });
+
     // TODO: remove jQuery dependency
   },
 
   getWords: function(level) {
     
-    var deferred = Q.defer(),
-        req      = new XMLHttpRequest();
-        url      = "http://api.wordnik.com:80/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=0&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=3&maxLength=10&limit=80&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
+    var deferred      = Q.defer(),
+        req           = new XMLHttpRequest();
+        maxWordLength = 5 + level;
+        minWordLength = Math.min(2 + level, 10);
+        url           = "http://api.wordnik.com:80/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=0&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=" + minWordLength + "&maxLength=" + maxWordLength + "&limit=80&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
     
     req.open('GET', url, true);
 
@@ -89,9 +71,60 @@ var TYYP = {
     return /^[a-zA-Z]+$/.test(word);
   },
 
+  advanceLevel: function() {
+    TYYP.getWords(TYYP.level).then(function(data) {
+      var parsedJSON = JSON.parse(data)
+
+      // Add game friendly words to the array
+      for (var i = 0; i < parsedJSON.length; i++) {
+        var word = parsedJSON[i]["word"];
+        if (TYYP.noSpecialCharacters(word)) {
+          TYYP.words.push(word.toLowerCase());          
+        }
+      }
+      TYYP.words.splice(0, 70);
+    });
+    TYYP.level++;
+
+    TYYP.targets = [];
+    TYYP.target_count = 0;
+    TYYP.score_balloons = [];
+
+    var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)]});
+    new_target.init();
+    TYYP.targets.push(new_target);
+    TYYP.target_count++;
+
+    requestAnimationFrame(TYYP.loop); 
+  },
+
   // Generic functions
   rand: function(min, max) {
     return Math.floor(Math.random() * max + min);
+  },
+
+  setupListener: function() {
+    $(document).keydown(function(e) {
+      if (TYYP.assigned_target == undefined || TYYP.assigned_target.dead) {
+        TYYP.findTarget(e.keyCode);
+      }
+
+      if (TYYP.assigned_target == undefined) {
+        TYYP.misses++;
+      }
+
+      if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
+        var new_bullet = new Bullet(TYYP.assigned_target);
+        TYYP.hits++;
+        new_bullet.init();
+        TYYP.bullets.push(new_bullet);
+        TYYP.assigned_target.end_y = new_bullet.end_y;
+        if (TYYP.assigned_target.dead) {
+          TYYP.score += TYYP.assigned_target.word.length;
+          TYYP.assigned_target = undefined;
+        }
+      }
+    });
   },
 
   // Game loop functions
@@ -100,7 +133,12 @@ var TYYP = {
   loop: function() {
     TYYP.update();
     TYYP.draw();
-    requestAnimationFrame(TYYP.loop);
+    if (TYYP.target_count > 0 && TYYP.targets.length > 0) {
+      requestAnimationFrame(TYYP.loop);      
+    }
+    else {
+      TYYP.advanceLevel();
+    }
   },
 
   findTarget: function(code) {
@@ -164,10 +202,11 @@ var TYYP = {
       }
     }
 
-    if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0) {
+    if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0 && TYYP.target_count < 8) {
       var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)]});
       new_target.init();
       TYYP.targets.push(new_target);
+      TYYP.target_count++;
     }
 
     TYYP.frame_count++;  
@@ -201,6 +240,7 @@ var TYYP = {
       percentage = ((TYYP.hits / (TYYP.hits + TYYP.misses)) * 100).toFixed(1);
     }
     TYYP.ctx.fillText("Accuracy: " + percentage + "%", 20, 50);
+    TYYP.ctx.fillText("Level: " + TYYP.level, 20, 80);
   }
 }
 
