@@ -9,6 +9,7 @@ var TYYP = {
   hits: 0,
   misses: 0,
   level: 1,
+  missed_alien_count: 0,
 
   init: function() {
     TYYP.canvas         = document.getElementById('game_board');
@@ -136,8 +137,11 @@ var TYYP = {
     if (TYYP.target_count > 0 && TYYP.targets.length > 0) {
       requestAnimationFrame(TYYP.loop);      
     }
-    else {
+    else if (TYYP.missed_alien_count < 4) {
       TYYP.advanceLevel();
+    }
+    else {
+      TYYP.endGame();
     }
   },
 
@@ -159,6 +163,7 @@ var TYYP = {
       TYYP.targets[i].updatePosition();
       if (TYYP.targets[i].y > TYYP.c_height + 50) {
         if (!TYYP.targets[i].dead && missed_letters > 0) {
+          TYYP.missed_alien_count++;
           TYYP.score = Math.max(TYYP.score - missed_letters, 0);
 
           if (TYYP.targets[i].score_balloon == undefined) {
@@ -202,7 +207,7 @@ var TYYP = {
       }
     }
 
-    if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0 && TYYP.target_count < 8) {
+    if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0 && TYYP.target_count < 10) {
       var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)]});
       new_target.init();
       TYYP.targets.push(new_target);
@@ -241,6 +246,15 @@ var TYYP = {
     }
     TYYP.ctx.fillText("Accuracy: " + percentage + "%", 20, 50);
     TYYP.ctx.fillText("Level: " + TYYP.level, 20, 80);
+  },
+
+  endGame: function() {
+    var word_width;
+
+    TYYP.ctx.fillStyle = "#550000";
+    TYYP.ctx.font = "50px Arial";
+    word_width = TYYP.ctx.measureText("GAME OVER").width;
+    TYYP.ctx.fillText("GAME OVER", 250 - (word_width / 2), TYYP.c_height / 2);
   }
 }
 
