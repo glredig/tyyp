@@ -110,16 +110,22 @@ var TYYP = {
         TYYP.findTarget(e.keyCode);
       }
 
+      // Key was pressed but didn't assign a target (i.e. total miss)
       if (TYYP.assigned_target == undefined) {
         TYYP.misses++;
       }
 
+      // If a target is assigned, and the pressed key registers a hit on it
+      // we create a bullet
       if (TYYP.assigned_target && TYYP.assigned_target.hit(e.keyCode)) {
         var new_bullet = new Bullet(TYYP.assigned_target);
         TYYP.hits++;
         new_bullet.init();
         TYYP.bullets.push(new_bullet);
         TYYP.assigned_target.end_y = new_bullet.end_y;
+
+        // If kepress was a kill shot, we add to the score and reset 
+        // the assigned target
         if (TYYP.assigned_target.dead) {
           TYYP.score += TYYP.assigned_target.word.length;
           TYYP.assigned_target = undefined;
@@ -134,17 +140,23 @@ var TYYP = {
   loop: function() {
     TYYP.update();
     TYYP.draw();
+
+    // Targets are still in play, so we continue looping
     if (TYYP.target_count > 0 && TYYP.targets.length > 0) {
       requestAnimationFrame(TYYP.loop);      
     }
+    // No targets, but we met minimum hit requirement,
+    // so we advance to the next level
     else if (TYYP.missed_alien_count < 4) {
       TYYP.advanceLevel();
     }
+    // Failed to kill enough aliens
     else {
       TYYP.endGame();
     }
   },
 
+  // Checking to see what target (if any) becomes the assigned target
   findTarget: function(code) {
     for (var i = 0; i < TYYP.targets.length; i++) {
       if (TYYP.targets[i].hit_count < TYYP.targets[i].word.length && TYYP.targets[i].getNextLetter() == KEYS.getChar(code)) {
@@ -154,6 +166,7 @@ var TYYP = {
     } 
   },
 
+  // General update function to update Targets, Bullets, Score balloons
   update: function() {
     var missed_letters,
         balloon;
@@ -161,11 +174,18 @@ var TYYP = {
     for (var i = 0; i < TYYP.targets.length; i++) {
       missed_letters = TYYP.targets[i].word.length - TYYP.targets[i].hit_count;
       TYYP.targets[i].updatePosition();
-      if (TYYP.targets[i].y > TYYP.c_height + 50) {
-        if (!TYYP.targets[i].dead && missed_letters > 0) {
-          TYYP.missed_alien_count++;
-          TYYP.score = Math.max(TYYP.score - missed_letters, 0);
 
+      // Handle aliens that made it to the bottom
+      if (TYYP.targets[i].y > TYYP.c_height + 50) {
+
+        // If the alien is alive (has missed letters)
+        if (!TYYP.targets[i].dead && missed_letters > 0) {
+          // Track missed aliens
+          TYYP.missed_alien_count++;
+          // Score penalty
+          TYYP.score = TYYP.score - missed_letters;
+
+          // Create a score balloon showing the negative impact
           if (TYYP.targets[i].score_balloon == undefined) {
             balloon = new ScoreBalloon({
               x: TYYP.targets[i].x,
@@ -182,9 +202,11 @@ var TYYP = {
           }
         }
 
+        // Reset assigned target
         if (TYYP.targets[i] == TYYP.assigned_target) {
           TYYP.assigned_target = undefined;
         }
+        // Cleanup targets array
         TYYP.targets.splice(i, 1);
         i--;
       }
@@ -207,6 +229,8 @@ var TYYP = {
       }
     }
 
+    // Control the creation of new targets (depending on the number on screen, limited by
+    // frame count, and limited by total number of targets created for this level)
     if (TYYP.targets.length < 9 && TYYP.frame_count % 150 == 0 && TYYP.target_count < 10) {
       var new_target = new Target({word: TYYP.words[TYYP.rand(0, TYYP.words.length)]});
       new_target.init();
@@ -217,6 +241,7 @@ var TYYP = {
     TYYP.frame_count++;  
   },
 
+  // Draw function to draw all Bullets, Targets, Score balloons
   draw: function() {
     var percentage;
 
