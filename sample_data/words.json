@@ -1,0 +1,69 @@
+var sample_words = {
+	5:	
+		[
+			{ word: 'otter' },
+			{ word: 'sails' },
+			{ word: 'saint' },
+			{ word: 'rotor' },
+			{ word: 'salon' },
+			{ word: 'onion' },
+			{ word: 'loser' },
+			{ word: 'nests' }
+		],
+	6:
+		[
+			{ word: 'roster' },
+			{ word: 'sailor' },
+			{ word: 'saints' },
+			{ word: 'rotors' },
+			{ word: 'saloon' },
+			{ word: 'resale' },
+			{ word: 'looser' },
+			{ word: 'nature' }
+		],
+	7:
+		[
+			{ word: 'artless' },
+			{ word: 'tertial' },
+			{ word: 'testers' },
+			{ word: 'asinine' },
+			{ word: 'artisan' },
+			{ word: 'sisters' },
+			{ word: 'tenures' },
+			{ word: 'tenuous' }
+		],
+	8:
+		[
+			{ word: 'statists' },
+			{ word: 'statuses' },
+			{ word: 'startles' },
+			{ word: 'stroller' },
+			{ word: 'totalist' },
+			{ word: 'arsonist' },
+			{ word: 'artisans' },
+			{ word: 'artsiest' }
+		],
+	9:
+		[
+			{ word: 'aliterate' },
+			{ word: 'straitest' },
+			{ word: 'internist' },
+			{ word: 'stoutness' },
+			{ word: 'intestine' },
+			{ word: 'restrains' },
+			{ word: 'alienates' },
+			{ word: 'striation' }
+		],
+	10:
+		[
+			{ word: 'transistor' },
+			{ word: 'tolerators' },
+			{ word: 'tortellini' },
+			{ word: 'translates' },
+			{ word: 'terrorists' },
+			{ word: 'terrorless' },
+			{ word: 'attentions' },
+			{ word: 'nonstarter' }
+		]
+
+}

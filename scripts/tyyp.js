@@ -10,6 +10,7 @@ var TYYP = {
   misses: 0,
   level: 1,
   missed_alien_count: 0,
+  MAX_LEVEL: 10,
 
   init: function() {
     TYYP.canvas         = document.getElementById('game_board');
@@ -21,7 +22,8 @@ var TYYP = {
     // Wait for word retrieving AJAX to finish before starting the
     // game
     TYYP.getWords(TYYP.level).then(function(data) {
-      var parsedJSON = JSON.parse(data)
+      var parsedJSON = typeof data === 'object' ? data : JSON.parse(data);
+      
 
       // Add game friendly words to the array
       for (var i = 0; i < parsedJSON.length; i++) {
@@ -41,7 +43,7 @@ var TYYP = {
     
     var deferred      = Q.defer(),
         req           = new XMLHttpRequest();
-        maxWordLength = 5 + level;
+        maxWordLength = 4 + level;
         minWordLength = Math.min(2 + level, 10);
         url           = "http://api.wordnik.com:80/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=0&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&minLength=" + minWordLength + "&maxLength=" + maxWordLength + "&limit=80&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
     
@@ -54,7 +56,10 @@ var TYYP = {
 
       // Error case
       if (req.status != 200 && req.status != 304) {
-        deferred.reject(new Error('Server responded with ' + req.status));
+        // In case the API is down, use the limited static data
+
+        deferred.resolve(TYYP.getStaticWords(minWordLength, maxWordLength));
+        // deferred.reject(new Error('Server responded with ' + req.status));
       }
       // Success case; resolve
       else {
@@ -67,15 +72,28 @@ var TYYP = {
     return deferred.promise;
   },
 
+  // Grab words from JSON file as fallback
+  getStaticWords: function(minLength, maxLength) {
+    var super_set = [];
+    Object.keys(sample_words).forEach(function(key) {
+      if (parseInt(key, 10) <= maxLength) {
+        super_set = super_set.concat(sample_words[key]);
+      }
+    });
+
+    return super_set;
+  },
+
   // Exclude words containing any special characters 
   noSpecialCharacters: function(word) {
     return /^[a-zA-Z]+$/.test(word);
   },
 
   advanceLevel: function() {
-    TYYP.getWords(TYYP.level).then(function(data) {
-      var parsedJSON = JSON.parse(data)
-
+    TYYP.getWords(TYYP.level + 1).then(function(data) {
+      var parsedJSON = typeof data === 'object' ? data : JSON.parse(data);
+      TYYP.words.splice(0, 70);
+      
       // Add game friendly words to the array
       for (var i = 0; i < parsedJSON.length; i++) {
         var word = parsedJSON[i]["word"];
@@ -83,7 +101,6 @@ var TYYP = {
           TYYP.words.push(word.toLowerCase());          
         }
       }
-      TYYP.words.splice(0, 70);
     });
     TYYP.level++;
 
